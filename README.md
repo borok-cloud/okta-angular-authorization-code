@@ -1,3 +1,5 @@
+#FYI Disclaimer : This is originally done by folks from okta - using the sample for personal angular project usage
+
 # Okta Angular + Okta Redirect Model Example
 
 This example shows you how to use the [Okta Angular Library][] to login a user to an Angular application.  The login is achieved through the [PKCE Flow][], where the user is redirected to the Okta-Hosted login page.  After the user authenticates they are redirected back to the application with an ID Token and Access Token.
