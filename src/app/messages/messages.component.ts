@@ -32,25 +32,64 @@ interface Message {
 export class MessagesComponent {
   private oktaAuth = inject(OKTA_AUTH);
   private http = inject(HttpClient);
-  failed: boolean|null = null;
-  messages$: Observable<Message[]> = this.http.get<{messages: Message[]}>(sampleConfig.resourceServer.messagesUrl, {
-    headers: {
-      Authorization: `Bearer  ${this.oktaAuth.getAccessToken()}`,
+  failed: boolean | null = null;
+  // messages$: Observable<Message[]> = this.http.get<{ messages: Message[] }>(sampleConfig.resourceServer.messagesUrl, {
+  //   headers: {
+  //     Authorization: `Bearer  ${this.oktaAuth.getAccessToken()}`,
+  //   }
+  // })
+  //   .pipe(
+  //     map(res => res.messages || []),
+  //     map(res => res.map(({ date, text }, index: number) => {
+  //       const d = new Date(date);
+  //       return {
+  //         date: `${d.toLocaleDateString()} ${d.toLocaleTimeString()}`,
+  //         text,
+  //         index
+  //       };
+  //     })),
+  //     catchError(err => {
+  //       console.error(err);
+  //       return throwError(() => err);
+  //     })
+  //   );
+
+  messages$: Observable<Message[]> | undefined;
+  constructor() {
+    this.getMessages();
+  }
+
+  async getMessages() {
+    try {
+      const accessToken = await this.oktaAuth.getAccessToken();
+      console.log('MessageComponent Access token:', accessToken);
+      this.messages$ = this.http
+        .get<{ messages: Message[] }>('http://localhost:8080/api/messages', {
+          //.get<{ messages: Message[] }>('http://localhost:8080/restricted', {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        })
+        .pipe(
+          map((res) =>
+            res.messages.map(({ date, text }, index: number) => {
+              const d = new Date(date);
+              return {
+                date: `${d.toLocaleDateString()} ${d.toLocaleTimeString()}`,
+                text,
+                index,
+              };
+            })
+          ),
+          catchError((err) => {
+            console.error('Error fetching messages:', err);
+            this.failed = true;
+            return throwError(() => err);
+          })
+        );
+    } catch (err) {
+      console.error('Error obtaining access token:', err);
+      this.failed = true;
     }
-  })
-  .pipe(
-    map(res => res.messages || []),
-    map(res => res.map(({date, text}, index: number) => {
-      const d = new Date(date);
-      return {
-        date: `${d.toLocaleDateString()} ${d.toLocaleTimeString()}`,
-        text,
-        index
-      };
-    })),
-    catchError(err => {
-      console.error(err);
-      return throwError(() => err);
-    })
-  );
+  }
 }

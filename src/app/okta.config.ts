@@ -1,3 +1,4 @@
+import { pkce } from '@okta/okta-auth-js';
 import { environment } from '../environments/environment';
 
 export default {
@@ -6,11 +7,12 @@ export default {
     issuer: environment.issuer,
     redirectUri: 'http://localhost:4200/login/callback',
     scopes: ['openid', 'profile', 'email', 'offline_access'],
-    testing: {
-      disableHttpsCheck: false
-    }
+    // testing: {
+    //   disableHttpsCheck: false
+    // }
+    pkce: true
   },
   resourceServer: {
-    messagesUrl: 'http://localhost:8000/api/messages',
+    messagesUrl: 'http://localhost:8000/api/health',
   },
 };
